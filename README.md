@@ -1,8 +1,9 @@
-Flask application demonstrating an API
+###Flask application demonstrating an API
 
-Create database
-```from app import *```
-```db.create_all()```
+Load app
+`from app import *`
+then create database
+`db.create_all()`
 
 Create a user:
 ```curl -i -H "Content-Type: appliation/json" -X POST -d '{"username":"<username>"}' http://localhost:5000/api/v1/users```
