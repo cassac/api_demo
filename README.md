@@ -20,6 +20,3 @@ Edit a user
 
 Delete a user
 ```curl -i -H "Content-Type: application/json" -X DELETE http://localhost:5000/api/v1/users/<username>```
-
-curl -i -H "Content-Type: application/json" -X POST -d '{"username":"user1"}' http://localhost:5000/api/v1/users
-curl -i -H "Content-Type: application/json" -X POST -d '{"username":"user2"}' http://localhost:5000/api/v1/users
