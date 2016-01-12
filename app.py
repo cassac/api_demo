@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, abort
+from flask import Flask, request, jsonify, abort, make_response
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
@@ -20,20 +20,22 @@ def users():
 		users = []
 		for user in User.query.all():
 			users.append({
-				"id": user.id,
-				"username": user.username
+				'id': user.id,
+				'username': user.username
 				})
 		return jsonify({"users": users}), 200
 
 	if request.method == 'POST':
+		user = User.query.filter_by(username=request.json['username']).first()
+		if user is not None:
+			return jsonify({'success': False, 'error': 'Username already taken'}), 400
 		try:
 			user = User(username=request.json['username'])
 			db.session.add(user)
 			db.session.commit()
-			print 'SUCCESS'
-			return jsonify({"success": True, "message": "User created"}), 201
+			return jsonify({'success': True, 'message': 'User created'}), 201
 		except Exception, e:
-			return jsonify({"success": False, "reason": e.message})
+			return jsonify({'success': False, 'reason': e.message})
 
 @app.route('/api/v1/users/<username>', methods=['GET', 'POST', 'DELETE'])
 def user(username):
@@ -41,18 +43,21 @@ def user(username):
 		user = User.query.filter_by(username=username).first()
 		if user is None:
 			abort(400)
-		user = [{"id": user.id, "username": user.username}]
-		return jsonify({"users": user}), 200
+		user = [{'id': user.id, 'username': user.username}]
+		return jsonify({'users': user}), 200
 
 	if request.method == 'POST':
 		user = User.query.filter_by(username=username).first()
+		new_username = User.query.filter_by(username=request.json['new_username']).first()
 		if user is None:
 			abort(400)
-		if "new_username" in request.json:
-			user.username = request.json['new_username']		
+		if new_username is None and user is not None:
+			user.username = request.json['new_username']
+		else:
+			return jsonify({'error': 'Username already taken'}), 400		
 		try:		
 			db.session.commit()
-			return jsonify({"success": True, "message": "User updated"}), 200
+			return jsonify({'success': True, 'message': 'User updated'}), 200
 		except Exception, e:
 			abort(400)
 
@@ -62,7 +67,7 @@ def user(username):
 			abort(400)
 		db.session.delete(user)
 		db.session.commit()
-		return jsonify({"success": True, "message": "User deleted"}), 200
+		return jsonify({'success': True, 'message': 'User deleted'}), 200
 
 if __name__ == '__main__':
 	app.run(debug=True)
