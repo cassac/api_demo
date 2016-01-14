@@ -1,24 +1,30 @@
+from functools import wraps
 from flask import Flask, request, jsonify, abort, make_response
 from flask_sqlalchemy import SQLAlchemy
-from flaskext.auth import Auth, login_required, login
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False # Suppress warning
-auth = Auth(app)
 db = SQLAlchemy(app)
 from models import *
 
-@app.before_request
-def login_user():
-	username = request.authorization['username']
-	password = request.authorization['password']
+def check_auth(username, password):
 	user = User.query.filter_by(username=username).first()
-	if user and user.verify_password(password):
-		print 'verified!'
-		login(user)
-	print 'unverified'
-	pass
+	return user.verify_password(password)
+
+def authenticate():
+	return jsonify({'message': 'Invalid username and/or password.'}), 401
+
+def login_required(f):
+	@wraps(f)
+	def decorated(*args, **kwargs):
+		auth = request.authorization
+		if not auth:
+			return authenticate()
+		elif not check_auth(auth.username, auth.password):
+			return authenticate()
+		return f(*args, **kwargs)
+	return decorated
 
 @app.errorhandler(400)
 def bad_request(error):
@@ -28,8 +34,7 @@ def bad_request(error):
 def not_found(error):
     return make_response(jsonify({'error': 'Resource not found'}), 404)
 
-@app.route('/api/v1/users', methods=['GET', 'POST', 'PUT', 'DELETE'])
-@login_required()
+@app.route('/api/v1/users', methods=['GET', 'POST'])
 def users():
 	if request.method == 'GET':
 		users = []
@@ -53,6 +58,7 @@ def users():
 			return jsonify({'success': False, 'reason': e.message})
 
 @app.route('/api/v1/users/<username>', methods=['GET', 'POST', 'DELETE'])
+@login_required
 def user(username):
 	if request.method == 'GET':
 		user = User.query.filter_by(username=username).first()
