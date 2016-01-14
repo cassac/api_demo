@@ -9,7 +9,7 @@ auth = Auth(app)
 db = SQLAlchemy(app)
 from models import *
 
-@app.after_request
+@app.before_request
 def login_user():
 	username = request.authorization['username']
 	password = request.authorization['password']
@@ -17,6 +17,7 @@ def login_user():
 	if user and user.verify_password(password):
 		print 'verified!'
 		login(user)
+	print 'unverified'
 	pass
 
 @app.errorhandler(400)
