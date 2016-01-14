@@ -1,10 +1,23 @@
 from flask import Flask, request, jsonify, abort, make_response
 from flask_sqlalchemy import SQLAlchemy
+from flaskext.auth import Auth, login_required, login
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False # Suppress warning
+auth = Auth(app)
 db = SQLAlchemy(app)
 from models import *
+
+@app.after_request
+def login_user():
+	username = request.authorization['username']
+	password = request.authorization['password']
+	user = User.query.filter_by(username=username).first()
+	if user and user.verify_password(password):
+		print 'verified!'
+		login(user)
+	pass
 
 @app.errorhandler(400)
 def bad_request(error):
@@ -15,6 +28,7 @@ def not_found(error):
     return make_response(jsonify({'error': 'Resource not found'}), 404)
 
 @app.route('/api/v1/users', methods=['GET', 'POST', 'PUT', 'DELETE'])
+@login_required()
 def users():
 	if request.method == 'GET':
 		users = []

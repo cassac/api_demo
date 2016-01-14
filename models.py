@@ -1,5 +1,6 @@
 from datetime import datetime
 from app import db
+from werkzeug.security import generate_password_hash, check_password_hash
 
 class Friend(db.Model):
 	__tablename__ = 'friends'
@@ -18,6 +19,7 @@ class User(db.Model):
 	__tablename__ = 'user'
 	id = db.Column(db.Integer, primary_key=True)
 	username = db.Column(db.String(50), unique=True)
+	password_hash = db.Column(db.String(128))
 	followed = db.relationship('Friend',
 								foreign_keys=[Friend.follower_id],
 								backref=db.backref('follower', lazy='joined'),
@@ -28,6 +30,23 @@ class User(db.Model):
 								backref=db.backref('followed', lazy='joined'),
 								lazy='dynamic',
 								cascade='all, delete-orphan')
+
+	def __init__(self, username):
+		self.username = username
+
+	@property
+	def password(self):
+		raise AttributeError('password is not a readable attribute')
+
+	@password.setter
+	def password(self, password):
+		self.password_hash = generate_password_hash(password)
+
+	def verify_password(self, password):
+		return check_password_hash(self.password_hash, password)
+
+	def __repr__(self):
+		return '<User %s>' % self.username
 
 	def follow(self, user):
 		if user not in self.followed.all():
@@ -50,9 +69,4 @@ class User(db.Model):
 		return self.followers.filter_by(
 			follower_id=user.id).first() is not None
 
-	def __init__(self, username):
-		self.username = username
-
-	def __repr__(self):
-		return '<User %s>' % self.username
 
