@@ -1,5 +1,5 @@
 from functools import wraps
-from flask import request, jsonify, abort, make_response
+from flask import request, jsonify, abort
 from utils import check_auth, authenticate
 from . import api
 from ..models import *
