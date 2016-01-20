@@ -3,7 +3,7 @@ from app import db
 from werkzeug.security import generate_password_hash, check_password_hash
 
 class Friend(db.Model):
-	__tablename__ = 'friends'
+	__tablename__ = 'friend'
 	follower_id = db.Column(db.Integer, db.ForeignKey('user.id'),
 					primary_key=True)
 	followed_id = db.Column(db.Integer, db.ForeignKey('user.id'),
@@ -13,6 +13,22 @@ class Friend(db.Model):
 	def __repr__(self):
 		return '<Follower: %s, Followed: %s>'%(self.follower_id,
 			self.followed_id)
+
+class Message(db.Model):
+	__tablename__ = 'message'
+	id = db.Column(db.Integer, primary_key=True)
+	text = db.Column(db.String(200), nullable=False)
+	timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+	sender_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+	sender = db.relationship('User', backref=db.backref('sent_messages'))
+	# recipients =
+
+	def __init__(self, text, sender_id):
+		self.text = text
+		self.sender_id = sender_id
+
+	def __repr__(self):
+		return 'Message(%d): "%s"' %(self.id, self.text[:20])
 
 
 class User(db.Model):
@@ -68,5 +84,3 @@ class User(db.Model):
 	def is_followed_by(self, user):
 		return self.followers.filter_by(
 			follower_id=user.id).first() is not None
-
-
