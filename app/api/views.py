@@ -1,12 +1,7 @@
 from functools import wraps
-from flask import Flask, request, jsonify, abort, make_response
-from flask_sqlalchemy import SQLAlchemy
-
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False # Suppress warning
-db = SQLAlchemy(app)
-from models import *
+from flask import request, jsonify, abort, make_response
+from . import api
+from ..models import *
 
 def check_auth(username, password):
 	user = User.query.filter_by(username=username).first()
@@ -26,15 +21,15 @@ def login_required(f):
 		return f(*args, **kwargs)
 	return decorated
 
-@app.errorhandler(400)
+@api.errorhandler(400)
 def bad_request(error):
     return make_response(jsonify({'error': 'Recheck your syntax'}), 400)
 
-@app.errorhandler(404)
+@api.errorhandler(404)
 def not_found(error):
     return make_response(jsonify({'error': 'Resource not found'}), 404)
 
-@app.route('/api/v1/users', methods=['GET', 'POST'])
+@api.route('/api/v1/users', methods=['GET', 'POST'])
 def users():
 	if request.method == 'GET':
 		users = []
@@ -57,7 +52,7 @@ def users():
 		except Exception, e:
 			return jsonify({'success': False, 'reason': e.message})
 
-@app.route('/api/v1/users/<username>', methods=['GET', 'POST', 'DELETE'])
+@api.route('/api/v1/users/<username>', methods=['GET', 'POST', 'DELETE'])
 @login_required
 def user(username):
 	if request.method == 'GET':
@@ -89,6 +84,3 @@ def user(username):
 		db.session.delete(user)
 		db.session.commit()
 		return jsonify({'success': True, 'message': 'User deleted'}), 200
-
-if __name__ == '__main__':
-	app.run(debug=True)
