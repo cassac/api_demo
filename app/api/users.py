@@ -1,14 +1,8 @@
 from functools import wraps
 from flask import request, jsonify, abort, make_response
+from utils import check_auth, authenticate
 from . import api
 from ..models import *
-
-def check_auth(username, password):
-	user = User.query.filter_by(username=username).first()
-	return user.verify_password(password)
-
-def authenticate():
-	return jsonify({'message': 'Invalid username and/or password.'}), 401
 
 def login_required(f):
 	@wraps(f)
