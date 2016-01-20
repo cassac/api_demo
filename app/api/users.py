@@ -15,15 +15,7 @@ def login_required(f):
 		return f(*args, **kwargs)
 	return decorated
 
-@api.errorhandler(400)
-def bad_request(error):
-    return make_response(jsonify({'error': 'Recheck your syntax'}), 400)
-
-@api.errorhandler(404)
-def not_found(error):
-    return make_response(jsonify({'error': 'Resource not found'}), 404)
-
-@api.route('/api/v1/users', methods=['GET', 'POST'])
+@api.route('/users', methods=['GET', 'POST'])
 def users():
 	if request.method == 'GET':
 		users = []
@@ -46,7 +38,7 @@ def users():
 		except Exception, e:
 			return jsonify({'success': False, 'reason': e.message})
 
-@api.route('/api/v1/users/<username>', methods=['GET', 'POST', 'DELETE'])
+@api.route('/users/<username>', methods=['GET', 'POST', 'DELETE'])
 @login_required
 def user(username):
 	if request.method == 'GET':
