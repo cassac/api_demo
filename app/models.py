@@ -14,6 +14,11 @@ class Friend(db.Model):
 		return '<Follower: %s, Followed: %s>'%(self.follower_id,
 			self.followed_id)
 
+recipients = db.Table('recipients',
+	db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
+	db.Column('message_id', db.Integer, db.ForeignKey('message.id')),	
+	)
+
 class Message(db.Model):
 	__tablename__ = 'message'
 	id = db.Column(db.Integer, primary_key=True)
@@ -21,7 +26,10 @@ class Message(db.Model):
 	timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 	sender_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 	sender = db.relationship('User', backref=db.backref('sent_messages'))
-	# recipients =
+	recipients = db.relationship('User',
+								secondary=recipients,
+								backref=db.backref('received_messages', lazy='dynamic'),
+								lazy='dynamic')
 
 	def __init__(self, text, sender_id):
 		self.text = text
