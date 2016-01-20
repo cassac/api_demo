@@ -31,9 +31,10 @@ class Message(db.Model):
 								backref=db.backref('received_messages', lazy='dynamic'),
 								lazy='dynamic')
 
-	def __init__(self, text, sender_id):
+	def __init__(self, text, sender_id, recipients):
 		self.text = text
 		self.sender_id = sender_id
+		self.recipients = recipients
 
 	def __repr__(self):
 		return 'Message(%d): "%s"' %(self.id, self.text[:20])
@@ -92,3 +93,9 @@ class User(db.Model):
 	def is_followed_by(self, user):
 		return self.followers.filter_by(
 			follower_id=user.id).first() is not None
+
+	def send_message(self, text, recipients):
+		message = Message(text=text, sender_id=self.id, recipients=recipients)
+		db.session.add(message)
+		db.session.commit()
+		return message
