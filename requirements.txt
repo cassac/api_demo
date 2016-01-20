@@ -1,5 +1,4 @@
 Flask==0.10.1
-Flask-Auth==0.85
 Flask-SQLAlchemy==2.1
 itsdangerous==0.24
 Jinja2==2.8
