@@ -12,11 +12,17 @@ Create a user:
 Get all users:
 ```curl -i -H "Content-Type: application/json" -X GET http://localhost:5000/api/v1/users```
 
-Get a user
+Get a user:
 ```curl -i -H "Content-Type: application/json" -X GET http://localhost:5000/api/v1/users/<username>```
 
-Edit a user
+Edit a user:
 ```curl -i -H "Content-Type: application/json" -X POST -d '{"new_username":"<new_username>"}' http://localhost:5000/api/v1/users/<username>```
 
-Delete a user
+Delete a user:
 ```curl -i -H "Content-Type: application/json" -X DELETE http://localhost:5000/api/v1/users/<username>```
+
+Get all messages:
+```curl -u <username>:<password> -i -H "Content-Type: application/json" -X GET http://localhost:5000/api/v1/messages```
+
+Create a message:
+```curl -u <username>:<password> -i -H Content-Type: application/json" -X POST -d '{"recipients":"<username>,<username>", "sender":"<username>", "text":"this is a message"}' http://localhost:5000/api/v1/messages```
