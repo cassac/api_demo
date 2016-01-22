@@ -1,13 +1,14 @@
 import unittest
+import json
 from flask import current_app, url_for
 from app import create_app, db
 from app.models import User
 
 # Run all tests in individual module
-#python manage.py test -t test_app.TestApp
+# python manage.py test -t test_app.TestApp
 
 # Run specific test in individual module
-#python manage.py test -t test_app.TestApp.test_direct_user_creation
+# python manage.py test -t test_app.TestApp.test_direct_user_creation
 
 class TestApp(unittest.TestCase):
 
@@ -16,6 +17,7 @@ class TestApp(unittest.TestCase):
 		self.app_context = self.app.app_context()
 		self.app_context.push()
 		db.create_all()
+		self.client = self.app.test_client(use_cookies=True)
 
 	def tearDown(self):
 		db.session.remove()
@@ -33,8 +35,25 @@ class TestApp(unittest.TestCase):
 		db.session.add(user)
 		db.session.commit()
 		user = User.query.first()
-		self.assertTrue(user.username, 'User1')
+		self.assertEqual(user.username, 'User1')
 
+	def test_post_request_user_creation(self):
+		response = self.client.post(url_for('api.users'),
+			data=json.dumps({'username': 'User2'}),
+			content_type='application/json'
+		)
+		self.assertEqual(response.status_code, 201)
+		data = json.loads(response.data)
+		self.assertEqual(data['message'], 'User created')
+		self.assertEqual(data['success'], True)
+
+	def test_get_request_all_users(self):
+		response = self.client.get(url_for('api.users'))
+		self.assertEqual(response.status_code, 200)
+
+	def test_get_request_specific_user_unathenticated(self):
+		response = self.client.get(url_for('api.user', username='User2'))
+		self.assertEqual(response.status_code, 401)
 
 if __name__ == '__main__':
     unittest.main()
