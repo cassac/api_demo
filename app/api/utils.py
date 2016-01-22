@@ -1,3 +1,5 @@
+from flask import jsonify
+
 from ..models import *
 
 def check_auth(username, password):
