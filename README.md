@@ -6,7 +6,7 @@ then create database
 `db.create_all()`
 
 Create a user:
-```curl -i -H "Content-Type: application/json" -X POST -d '{"username":"<username>"}' http://localhost:5000/api/v1/users```
+```curl -i -H "Content-Type: application/json" -X POST -d '{"username":"<username>", "password":"<password>"}' http://localhost:5000/api/v1/users```
 
 Get all users:
 ```curl -i -H "Content-Type: application/json" -X GET http://localhost:5000/api/v1/users```
