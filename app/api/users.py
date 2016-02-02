@@ -32,13 +32,14 @@ def users():
 			return jsonify({'success': False, 'error': 'Username already taken'}), 400
 		try:
 			user = User(username=request.json['username'])
+			user.password = request.json['password']
 			db.session.add(user)
 			db.session.commit()
 			return jsonify({'success': True, 'message': 'User created'}), 201
 		except Exception, e:
 			return jsonify({'success': False, 'reason': e.message})
 
-@api.route('/users/<username>', methods=['GET', 'POST', 'DELETE'])
+@api.route('/users/<string:username>', methods=['GET', 'POST', 'DELETE'])
 @login_required
 def user(username):
 	if request.method == 'GET':
