@@ -28,6 +28,7 @@ def messages(limit=5, offset=0):
 		for message in query.items:
 			messages.append({
 				'id': message.id,
+				'timestamp': message.timestamp,
 				'text': message.text,
 				'sender': message.sender.username,
 				'recipients': [r.username for r in message.recipients],
