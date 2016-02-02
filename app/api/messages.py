@@ -32,7 +32,8 @@ def messages():
 	if request.method == 'POST':
 		try:
 			recipients_list = request.json['recipients'].split(',')
-			recipients = [User.query.filter_by(username=username.strip()).first() for username in recipients_list]
+			recipients = [User.query.filter_by(username=username.strip()).first()\
+				for username in recipients_list]
 			sender = User.query.filter_by(username=request.json['sender']).first()
 			text = request.json['text']
 			sender.send_message(text=text, recipients=recipients)

@@ -50,7 +50,8 @@ def user(username):
 
 	if request.method == 'POST':
 		user = User.query.filter_by(username=username).first()
-		new_username = User.query.filter_by(username=request.json['new_username']).first()
+		new_username = User.query.filter_by(
+			username=request.json['new_username']).first()
 		if user is None:
 			abort(400)
 		if new_username is None and user is not None:
