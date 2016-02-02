@@ -17,10 +17,15 @@ def login_required(f):
 
 @api.route('/messages', methods=['GET', 'POST'])
 @login_required
-def messages():
+def messages(limit=5, offset=0):
 	if request.method == 'GET':
 		messages = []
-		for message in Message.query.all():
+		if offset > 1:
+			page_offset=int(offset/limit)
+		else:
+			page_offset=1
+		query = Message.query.paginate(per_page=limit, page=page_offset)
+		for message in query.items:
 			messages.append({
 				'id': message.id,
 				'text': message.text,
